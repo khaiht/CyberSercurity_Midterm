@@ -82,14 +82,14 @@ static void apply_sbox(byte matrix[4][4]) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             matrix[i][j] = SBOX[matrix[i][j]];
-    log_matrix(matrix, "SBox");
+    log_matrix(matrix, "SubBytes");
 }
 
 static void apply_inv_sbox(byte matrix[4][4]) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             matrix[i][j] = INV_SBOX[matrix[i][j]];
-    log_matrix(matrix, "InvSBox");
+    log_matrix(matrix, "InvSubBytes");
 }
 
 static void rotate_rows(byte matrix[4][4]) {
@@ -98,7 +98,7 @@ static void rotate_rows(byte matrix[4][4]) {
     temp = matrix[2][0]; matrix[2][0] = matrix[2][2]; matrix[2][2] = temp;
     temp = matrix[2][1]; matrix[2][1] = matrix[2][3]; matrix[2][3] = temp;
     temp = matrix[3][0]; matrix[3][0] = matrix[3][3]; matrix[3][3] = matrix[3][2]; matrix[3][2] = matrix[3][1]; matrix[3][1] = temp;
-    log_matrix(matrix, "RotateRows");
+    log_matrix(matrix, "ShiftRows");
 }
 
 static void inv_rotate_rows(byte matrix[4][4]) {
@@ -107,7 +107,7 @@ static void inv_rotate_rows(byte matrix[4][4]) {
     temp = matrix[2][0]; matrix[2][0] = matrix[2][2]; matrix[2][2] = temp;
     temp = matrix[2][1]; matrix[2][1] = matrix[2][3]; matrix[2][3] = temp;
     temp = matrix[3][0]; matrix[3][0] = matrix[3][1]; matrix[3][1] = matrix[3][2]; matrix[3][2] = matrix[3][3]; matrix[3][3] = temp;
-    log_matrix(matrix, "InvRotateRows");
+    log_matrix(matrix, "InvShiftRows");
 }
 
 static void mix_columns(byte matrix[4][4]) {
@@ -128,7 +128,7 @@ static void inv_mix_columns(byte matrix[4][4]) {
     for (int i = 0; i < 4; i++) {
         temp[0] = galois_mult(0x0e, matrix[0][i]) ^ galois_mult(0x0b, matrix[1][i]) ^ galois_mult(0x0d, matrix[2][i]) ^ galois_mult(0x09, matrix[3][i]);
         temp[1] = galois_mult(0x09, matrix[0][i]) ^ galois_mult(0x0e, matrix[1][i]) ^ galois_mult(0x0b, matrix[2][i]) ^ galois_mult(0x0d, matrix[3][i]);
-        temp[2] = galois_mult(0x0d, matrix[0][i]) ^ galois_mult(0x0e, matrix[1][i]) ^ galois_mult(0x0b, matrix[2][i]) ^ galois_mult(0x09, matrix[3][i]);
+        temp[2] = galois_mult(0x0d, matrix[0][i]) ^ galois_mult(0x09, matrix[1][i]) ^ galois_mult(0x0e, matrix[2][i]) ^ galois_mult(0x0b, matrix[3][i]);
         temp[3] = galois_mult(0x0b, matrix[0][i]) ^ galois_mult(0x0d, matrix[1][i]) ^ galois_mult(0x09, matrix[2][i]) ^ galois_mult(0x0e, matrix[3][i]);
         for (int j = 0; j < 4; j++)
             matrix[j][i] = temp[j];
@@ -139,8 +139,8 @@ static void inv_mix_columns(byte matrix[4][4]) {
 static void xor_round_key(byte matrix[4][4], const byte round_key[16]) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-            matrix[i][j] ^= round_key[i * 4 + j];
-    log_matrix(matrix, "XorRoundKey");
+            matrix[i][j] ^= round_key[i + 4 * j]; // Column-major
+    log_matrix(matrix, "AddRoundKey");
 }
 
 static void rotate_word(byte word[4]) {
@@ -188,6 +188,15 @@ static int pad_data(byte *data, int len) {
     return len + pad_len;
 }
 
+static int unpad_data(byte *data, int len) {
+    if (len < BLOCK_SIZE) return len;
+    int pad_len = data[len - 1];
+    if (pad_len > BLOCK_SIZE || pad_len == 0) return len;
+    for (int i = len - pad_len; i < len; i++)
+        if (data[i] != pad_len) return len;
+    return len - pad_len;
+}
+
 void encrypt_block(byte matrix[4][4], const byte expanded_key[EXPANDED_KEY_SIZE]) {
     byte round_key[16];
 
@@ -217,18 +226,18 @@ void decrypt_block(byte matrix[4][4], const byte expanded_key[EXPANDED_KEY_SIZE]
     for (int i = 0; i < 16; i++)
         round_key[i] = expanded_key[Nr * 16 + i];
     xor_round_key(matrix, round_key);
-    inv_rotate_rows(matrix);
-    apply_inv_sbox(matrix);
 
     for (int round = Nr - 1; round > 0; round--) {
+        inv_rotate_rows(matrix);
+        apply_inv_sbox(matrix);
         for (int i = 0; i < 16; i++)
             round_key[i] = expanded_key[round * 16 + i];
         xor_round_key(matrix, round_key);
         inv_mix_columns(matrix);
-        inv_rotate_rows(matrix);
-        apply_inv_sbox(matrix);
     }
 
+    inv_rotate_rows(matrix);
+    apply_inv_sbox(matrix);
     for (int i = 0; i < 16; i++)
         round_key[i] = expanded_key[i];
     xor_round_key(matrix, round_key);
@@ -259,41 +268,84 @@ static void process_file(const char *input_path, const char *output_path, const 
     data_len = ftell(in_file);
     fseek(in_file, 0, SEEK_SET);
 
-    while (data_len >= BLOCK_SIZE) {
-        fread(block, 1, BLOCK_SIZE, in_file);
-        data_len -= BLOCK_SIZE;
+    if (process_block == encrypt_block) {
+        while (data_len >= BLOCK_SIZE) {
+            fread(block, 1, BLOCK_SIZE, in_file);
+            data_len -= BLOCK_SIZE;
 
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                matrix[i][j] = block[i * 4 + j];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    matrix[j][i] = block[i * 4 + j]; // Column-major
 
-        log_matrix(matrix, "Input Matrix");
-        process_block(matrix, expanded_key);
+            log_matrix(matrix, "Input Matrix");
+            process_block(matrix, expanded_key);
 
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                block[i * 4 + j] = matrix[i][j];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    block[i * 4 + j] = matrix[j][i];
 
-        fwrite(block, 1, BLOCK_SIZE, out_file);
-    }
+            fwrite(block, 1, BLOCK_SIZE, out_file);
+        }
 
-    if (data_len > 0 || ftell(in_file) == 0) {
-        memset(block, 0, BLOCK_SIZE);
-        fread(block, 1, data_len, in_file);
-        data_len = pad_data(block, data_len);
+        if (data_len > 0 || ftell(in_file) == 0) {
+            memset(block, 0, BLOCK_SIZE);
+            fread(block, 1, data_len, in_file);
+            data_len = pad_data(block, data_len);
 
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                matrix[i][j] = block[i * 4 + j];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    matrix[j][i] = block[i * 4 + j];
 
-        log_matrix(matrix, "Padded Input Matrix");
-        process_block(matrix, expanded_key);
+            log_matrix(matrix, "Padded Input Matrix");
+            process_block(matrix, expanded_key);
 
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                block[i * 4 + j] = matrix[i][j];
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    block[i * 4 + j] = matrix[j][i];
 
-        fwrite(block, 1, BLOCK_SIZE, out_file);
+            fwrite(block, 1, BLOCK_SIZE, out_file);
+        }
+    } else { // Decrypt
+        byte *buffer = NULL;
+        int buffer_len = 0;
+
+        // Read entire file to buffer
+        buffer = malloc(data_len);
+        if (!buffer) {
+            printf("Memory allocation failed\n");
+            fclose(in_file);
+            fclose(out_file);
+            fclose(log_file);
+            return;
+        }
+        fread(buffer, 1, data_len, in_file);
+        buffer_len = data_len;
+
+        // Process blocks
+        for (int pos = 0; pos < buffer_len; pos += BLOCK_SIZE) {
+            for (int i = 0; i < BLOCK_SIZE; i++)
+                block[i] = buffer[pos + i];
+
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    matrix[j][i] = block[i * 4 + j];
+
+            log_matrix(matrix, "Input Matrix");
+            process_block(matrix, expanded_key);
+
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    block[i * 4 + j] = matrix[j][i];
+
+            if (pos + BLOCK_SIZE >= buffer_len) {
+                int new_len = unpad_data(block, BLOCK_SIZE);
+                fwrite(block, 1, new_len, out_file);
+            } else {
+                fwrite(block, 1, BLOCK_SIZE, out_file);
+            }
+        }
+
+        free(buffer);
     }
 
     fclose(in_file);

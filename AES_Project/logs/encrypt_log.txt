@@ -1,0 +1,246 @@
+Padded Input Matrix:
+54 20 08 08 
+65 41 08 08 
+73 45 08 08 
+74 53 08 08 
+
+AddRoundKey:
+7f 08 a3 01 
+1b ef ff c7 
+66 97 1d 47 
+62 f5 80 34 
+
+SubBytes:
+d2 30 0a 7c 
+af df 16 c6 
+33 88 a4 a0 
+aa e6 cd 18 
+
+ShiftRows:
+d2 30 0a 7c 
+df 16 c6 af 
+a4 a0 33 88 
+18 aa e6 cd 
+
+MixColumns:
+79 50 90 57 
+98 4d 2e 77 
+76 98 9b 94 
+26 a9 3c 22 
+
+AddRoundKey:
+d9 d8 b3 7d 
+62 19 8d 1b 
+88 b4 a2 e2 
+31 18 05 27 
+
+SubBytes:
+35 61 6d ff 
+aa d4 5d af 
+c4 8d 3a 98 
+c7 ad 6b cc 
+
+ShiftRows:
+35 61 6d ff 
+d4 5d af aa 
+3a 98 c4 8d 
+cc c7 ad 6b 
+
+MixColumns:
+fb 7a 59 e6 
+04 af d2 57 
+da 45 bd e9 
+32 f3 9d eb 
+
+AddRoundKey:
+09 00 00 95 
+c6 39 e7 0e 
+4f fc 3d 1f 
+c0 b0 e7 94 
+
+SubBytes:
+01 63 63 2a 
+b4 12 94 ab 
+84 b0 27 c0 
+ba e7 94 22 
+
+ShiftRows:
+01 63 63 2a 
+12 94 ab b4 
+27 c0 84 b0 
+22 ba e7 94 
+
+MixColumns:
+31 1b 43 b7 
+6e b1 5e 06 
+3b b9 e9 42 
+72 9e 5f 49 
+
+AddRoundKey:
+0c 5c 5d da 
+ee a7 7d 7c 
+7c 47 97 ca 
+0f a0 1b 72 
+
+SubBytes:
+fe 4a 4c 57 
+28 5c ff 10 
+10 a0 88 74 
+76 e0 af 40 
+
+ShiftRows:
+fe 4a 4c 57 
+5c ff 10 28 
+88 74 10 a0 
+40 76 e0 af 
+
+MixColumns:
+cb 8c 58 d9 
+85 45 bc 53 
+69 c7 47 ce 
+4d b9 0f 34 
+
+AddRoundKey:
+24 24 ee 02 
+c1 17 cd 58 
+cc 9c 62 63 
+0c c6 34 34 
+
+SubBytes:
+36 36 28 77 
+78 f0 bd 6a 
+4b de aa fb 
+fe b4 18 18 
+
+ShiftRows:
+36 36 28 77 
+f0 bd 6a 78 
+aa fb 4b de 
+18 fe b4 18 
+
+MixColumns:
+d5 b5 11 a0 
+30 bf 95 e6 
+a1 7f 13 80 
+30 fb 2a 0f 
+
+AddRoundKey:
+01 c9 db b1 
+e1 3c 67 1f 
+67 e2 ab 95 
+c8 7c 96 b3 
+
+SubBytes:
+7c dd b9 c8 
+f8 eb 85 c0 
+85 98 62 2a 
+e8 10 90 6d 
+
+ShiftRows:
+7c dd b9 c8 
+eb 85 c0 f8 
+62 2a 85 98 
+6d e8 10 90 
+
+MixColumns:
+d1 f7 a7 90 
+7a 5a a6 00 
+e4 2f 58 b0 
+d7 18 b5 18 
+
+AddRoundKey:
+bc e6 7c 5a 
+f2 51 5f 00 
+47 11 de 23 
+ad e5 f4 e5 
+
+SubBytes:
+65 8e 10 be 
+89 d1 cf 63 
+a0 82 1d 26 
+95 d9 bf d9 
+
+ShiftRows:
+65 8e 10 be 
+d1 cf 63 89 
+1d 26 a0 82 
+d9 95 d9 bf 
+
+MixColumns:
+66 fe fc da 
+22 f4 f4 95 
+fe a9 58 f2 
+ca 51 5a b7 
+
+AddRoundKey:
+28 a1 78 94 
+76 ab 52 33 
+09 60 17 2e 
+c4 a2 e8 f8 
+
+SubBytes:
+34 32 bc 22 
+38 62 00 c3 
+01 d0 f0 31 
+1c 3a 9b 41 
+
+ShiftRows:
+34 32 bc 22 
+62 00 c3 38 
+f0 31 01 d0 
+41 1c 3a 9b 
+
+MixColumns:
+7f 49 06 47 
+ba 7d 18 a2 
+6e 74 33 17 
+4c 5f 69 a3 
+
+AddRoundKey:
+95 fc 37 38 
+68 f0 33 2f 
+1d ce c6 3e 
+6d 8d 09 8c 
+
+SubBytes:
+2a b0 9a 07 
+45 8c c3 15 
+a4 8b b4 b2 
+3c 5d 01 64 
+
+ShiftRows:
+2a b0 9a 07 
+8c c3 15 45 
+b4 b2 a4 8b 
+64 3c 5d 01 
+
+MixColumns:
+0b ab e9 4b 
+8a dc 1a 0a 
+79 48 3b 4c 
+8e c2 be c5 
+
+AddRoundKey:
+a7 b2 c1 1c 
+fd 26 cb 56 
+1f 94 12 4c 
+7d e3 ff ab 
+
+SubBytes:
+5c 37 78 9c 
+54 f7 1f b1 
+c0 22 c9 29 
+ff 11 16 62 
+
+ShiftRows:
+5c 37 78 9c 
+f7 1f b1 54 
+c9 29 c0 22 
+62 ff 11 16 
+
+AddRoundKey:
+8c fe 99 2a 
+e3 f1 8e 37 
+30 0c cc 2e 
+ca 76 d9 b0 
+

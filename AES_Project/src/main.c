@@ -6,8 +6,8 @@ int main() {
         0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c
     };
 
-    process_file("input/input.txt", "output/encrypted.txt", "debug_logs/encrypt_log.txt", key, encrypt_block);
-    process_file("output/encrypted.txt", "output/decrypted.txt", "debug_logs/decrypt_log.txt", key, decrypt_block);
+    process_file("input/input.txt", "output/encrypted.txt", "logs/encrypt_log.txt", key, encrypt_block);
+    process_file("output/encrypted.txt", "output/decrypted.txt", "logs/decrypt_log.txt", key, decrypt_block);
 
     return 0;
-}
+} 
